@@ -71,9 +71,142 @@ l42            |  '-'  |                |  '-'  |
 ==============='       '================'       |
 ```
 
+## REPL
+
+- `R`ead
+- `E`valuate
+- `P`rint
+- `L`oop
+
+O REPL é uma ferramenta que nos permite executar código fonte de forma interativa, ele lê o código fonte, avalia o código fonte, imprime o resultado e repete tudo de novo.
+
+REPLs são muito úteis para testar código e para aprender uma linguagem de programação. 
+
+Eles foram popularizados pelo [Lisp](https://en.wikipedia.org/wiki/Lisp_(programming_language)) e hoje em dia são muito comuns em diversas linguagens de programação.
+
+```bash
+go run main.go
+```
+
+## PARSING
+
+Um parser transform um determinado input em uma estrutura de dados, no nosso caso o parser transforma os tokens em uma árvore sintática abstrata (AST).
+
+Uma AST é uma estrutura de dados que representa o código fonte de forma hierárquica, ela é muito útil para avaliar o código fonte.
+
+Existem ferramentas capazes de gerar parsers a partir de uma gramática, mas nesse projeto o parser é feito manualmente.
+
+### Gramática
+
+Uma gramática é uma forma de descrever uma linguagem, ela é composta por regras que descrevem como a linguagem funciona.
+
+Existem diversas formas de escrever uma gramática, mas a mais comum é a [Backus-Naur Form](https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form) (BNF).
+
+```bnf
+<regra> ::= <expressão>
+```
+
+Exemplo simples:
+
+```bnf
+<operador> ::= +|-|/|*
+```
+
+A regra acima descreve um operador, que pode ser `+`, `-`, `/` ou `*`.
+
+Exemplo mais complexo:
+
+```bnf
+	chunk ::= block
+
+	block ::= {stat} [retstat]
+
+	stat ::=  ‘;’ | 
+		 varlist ‘=’ explist | 
+		 functioncall | 
+		 label | 
+		 break | 
+		 goto Name | 
+		 do block end | 
+		 while exp do block end | 
+		 repeat block until exp | 
+		 if exp then block {elseif exp then block} [else block] end | 
+		 for Name ‘=’ exp ‘,’ exp [‘,’ exp] do block end | 
+		 for namelist in explist do block end | 
+		 function funcname funcbody | 
+		 local function Name funcbody | 
+		 local attnamelist [‘=’ explist] 
+
+	attnamelist ::=  Name attrib {‘,’ Name attrib}
+
+	attrib ::= [‘<’ Name ‘>’]
+
+	retstat ::= return [explist] [‘;’]
+
+	label ::= ‘::’ Name ‘::’
+
+	funcname ::= Name {‘.’ Name} [‘:’ Name]
+
+	varlist ::= var {‘,’ var}
+
+	var ::=  Name | prefixexp ‘[’ exp ‘]’ | prefixexp ‘.’ Name 
+
+	namelist ::= Name {‘,’ Name}
+
+	explist ::= exp {‘,’ exp}
+
+	exp ::=  nil | false | true | Numeral | LiteralString | ‘...’ | functiondef | 
+		 prefixexp | tableconstructor | exp binop exp | unop exp 
+
+	prefixexp ::= var | functioncall | ‘(’ exp ‘)’
+
+	functioncall ::=  prefixexp args | prefixexp ‘:’ Name args 
+
+	args ::=  ‘(’ [explist] ‘)’ | tableconstructor | LiteralString 
+
+	functiondef ::= function funcbody
+
+	funcbody ::= ‘(’ [parlist] ‘)’ block end
+
+	parlist ::= namelist [‘,’ ‘...’] | ‘...’
+
+	tableconstructor ::= ‘{’ [fieldlist] ‘}’
+
+	fieldlist ::= field {fieldsep field} [fieldsep]
+
+	field ::= ‘[’ exp ‘]’ ‘=’ exp | Name ‘=’ exp | exp
+
+	fieldsep ::= ‘,’ | ‘;’
+
+	binop ::=  ‘+’ | ‘-’ | ‘*’ | ‘/’ | ‘//’ | ‘^’ | ‘%’ | 
+		 ‘&’ | ‘~’ | ‘|’ | ‘>>’ | ‘<<’ | ‘..’ | 
+		 ‘<’ | ‘<=’ | ‘>’ | ‘>=’ | ‘==’ | ‘~=’ | 
+		 and | or
+
+	unop ::= ‘-’ | not | ‘#’ | ‘~’
+```
+
+O exemplo acima é [toda a sintaxe](https://www.lua.org/manual/5.4/manual.html#9) da linguagem [Lua](https://www.lua.org/).
+
+
+Mas enfim, vamos voltar para o nosso parser.
+
+### Escrevendo um parser
+
+Existem diversas estratégias para escrever um parser, mas a mais comum é a [Recursive Descent](https://en.wikipedia.org/wiki/Recursive_descent_parser), que é uma estratégia top-down, ou seja, a gente começa do topo da árvore e vai descendo até as folhas. É como vamos fazer o nosso. 
+
+Outras variações são [LL](https://en.wikipedia.org/wiki/LL_parser) e [LL(k)](https://en.wikipedia.org/wiki/LL_parser#LL(k)_parsers), que são parsers top-down que usam lookahead para decidir qual regra aplicar.
+
+Parsers bottom-up são mais complexos e geralmente são gerados a partir de uma gramática, como é o caso do [LALR](https://en.wikipedia.org/wiki/LALR_parser) e [LR](https://en.wikipedia.org/wiki/LR_parser).
+
+## ESTUDAR 
+- [ ] Context Free Grammar
+- [ ] Backus-Naur Form
+- [ ] Extended Backus-Naur Form
+
 ## MELHORIAS
 
-- [ ] Suporte a unicode
+- [ ] Suporte a unicode (byte -> rune)
 - [ ] Suporte a números de ponto flutuante
 - [ ] Suporte a números hexadecimais
 - [ ] Suporte a números binários
