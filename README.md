@@ -227,6 +227,90 @@ Outras variações são [LL](https://en.wikipedia.org/wiki/LL_parser) e [LL(k)](
 
 Parsers bottom-up são mais complexos e geralmente são gerados a partir de uma gramática, como é o caso do [LALR](https://en.wikipedia.org/wiki/LALR_parser) e [LR](https://en.wikipedia.org/wiki/LR_parser).
 
+### STATEMENTS VS EXPRESSIONS
+
+Em linguagens de programação existem duas categorias de coisas, statements e expressions.
+
+Statements são coisas que não retornam valores.
+
+Expressions são coisas que retornam valores.
+
+Exemplos de statements:
+
+- `let x = 1;`
+
+Em algumas linguagens de programação `let x = 1` é uma expression, mas em Monkey é um statement. Isso é uma decisão de design. Nem sempre uma mesma sintaxe em linguagens diferentes tem o mesmo significado.
+
+> Em GDScript, por exemplo, um `if` é uma expression, mas em JavaScript um `if` é um statement.
+
+Exemplos de expressions:
+
+- `1 + 2` (retorna `3`)
+
+- `1` (retorna `1`)
+
+- `true` (retorna `true`)
+
+Essa distinção é importante porque em Monkey não podemos fazer coisas como:
+
+```monkey
+let x = let y = 1;
+```
+
+Isso não é possível porque `let y = 1` é um statement e não uma expression.
+
+**A definição de statement e expression pode variar de pessoa para pessoa, mas essa definição vai servir para o nosso caso.**
+
+### AST
+
+AST = Abstract Syntax Tree (Árvore Sintática Abstrata)
+
+Uma AST é uma estrutura de dados que representa o código fonte de forma hierárquica, ela é muito útil para avaliar o código fonte.
+
+O código fonte a seguir é representado pelo AST abaixo:
+```monkey
+let x = 1 + 2;
+```
+
+```json
+{
+	"type": "Program",
+	"value": [
+		{
+			"type": "LetStatement",
+			"value": {
+				"type": "Identifier",
+				"value": "x"
+			},
+			"expression": {
+				"type": "InfixExpression",
+				"value": {
+					"type": "IntegerLiteral",
+					"value": 1
+				},
+				"operator": "+",
+				"right": {
+					"type": "IntegerLiteral",
+					"value": 2
+				}
+			}
+		}
+	]
+}
+```
+
+O AST acima é um JSON fictício, mas os ASTs reais são muito parecidos com ele.
+
+Dizemos que é uma árvore porque ela é composta por nós, e esses nós podem ter filhos.
+Dizemos que é uma árvore sintática porque ela representa a sintaxe da linguagem.
+Dizemos que é uma árvore sintática abstrata porque ela não representa o código fonte de forma exata, ela é uma abstração do código fonte onde só consideramos o que é importante para nós.
+
+### Parser
+
+O parser é a ferramenta que nos permite transformar os tokens em uma AST, ele lê os tokens e gera a AST.
+
+No nosso programa temos um parser recursivo. Ele interpreta os token e vai gerando nós no AST, ele vai descendo na árvore até encontrar um token que não sabe o que fazer, nesse caso ele gera um erro.
+
 ## ESTUDAR
 
 - [ ] Context Free Grammar
