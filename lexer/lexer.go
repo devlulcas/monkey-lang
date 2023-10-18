@@ -42,17 +42,23 @@ func (l *Lexer) peekChar() byte {
 	}
 }
 
+// Consome caracteres e retorna tokens, avançando na leitura do código fonte
 func (l *Lexer) NextToken() token.Token {
+	// Espacinho para o token lido nessa rodada
 	var tkn token.Token
 
+	// Comemos o espaço em branco porque ele não importa para nós
 	l.eatWhitespace()
 
+	// Seleção de qual token está sendo representado por um ou mais caracteres no código fonte
 	switch l.ch {
 	case '=':
+		// Verificamos se o próximo token se trata de outro `=` para sabermos se o token atual se trata de um operador
+		// de igualdade (`==`). Se não for o caso, sabemos que se trata de uma atribuição (`=`)
 		if l.peekChar() == '=' {
 			initialCh := l.ch
 
-			// Consome o primeiro '='  e vai pro próximo '='
+			// Consome o primeiro '=' e vai pro próximo '='
 			l.readChar()
 
 			tkn = token.Token{
@@ -63,6 +69,9 @@ func (l *Lexer) NextToken() token.Token {
 			tkn = newToken(token.ASSIGN, l.ch)
 		}
 	case '!':
+		// Fazemos uma operação parecida com a de "igualdade" vs "atribuição" só que dessa vez para o símbolo de
+		// desigualdade (`!=`) e a negação (`!`). Essa operação de combinação de caracteres é bastante usada para evitar
+		// "queimar" caracteres.
 		if l.peekChar() == '=' {
 			initialCh := l.ch
 
@@ -114,22 +123,24 @@ func (l *Lexer) NextToken() token.Token {
 			// retornar antecipadamente
 			return tkn
 		} else if isDigit(l.ch) {
-			// Precisamos ler dígitos
+			// Precisamos ler dígitos e sabemos que números correspondem somente a tokens de números inteiros em monkey
 			tkn.Literal = l.readNumber()
 			tkn.Type = token.INT
 
 			return tkn
 		} else {
+			// Tokens fora do catálogo não contam
 			tkn = newToken(token.ILLEGAL, l.ch)
 		}
 	}
 
-	// Consome o caractere lido
+	// Consome o caractere lido, afinal não queremos ler o mesmo caractere múltiplas vezes
 	l.readChar()
 
 	return tkn
 }
 
+// Consome espaços em branco para ignorá-los
 func (l *Lexer) eatWhitespace() {
 	// Espaços, tabulações, quebra de linha e recuos não significam nada para nós
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
@@ -138,6 +149,7 @@ func (l *Lexer) eatWhitespace() {
 	}
 }
 
+// Lê um identificador (basicamente uma palavra composta apenas por caracteres não numéricos)
 func (l *Lexer) readIdentifier() string {
 	// Inicio do possível identificador/palavra-chave
 	position := l.position
@@ -162,16 +174,19 @@ func (l *Lexer) readNumber() string {
 	return l.input[position:l.position]
 }
 
+// Verifica se o caractere passado é uma "letra" (Basicamente caracteres de A a Z e o sublinhado)
 func isLetter(ch byte) bool {
 	// Aceitamos caracteres ASCII [A-Za-z_]
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
 }
 
+// Verifica se o caractere passado é um dígito
 func isDigit(ch byte) bool {
-	// Aceitamos caracteres entre [0-9_]
+	// Aceitamos caracteres entre [0-9]
 	return '0' <= ch && ch <= '9'
 }
 
+// Basicamente um `construtor` de tokens
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{
 		Type:    tokenType,
