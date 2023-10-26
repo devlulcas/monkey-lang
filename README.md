@@ -27,6 +27,11 @@ jgs  `"""""""""`  ,--`,--'\/\    /
 
 [ASCII arts by ASCII Art Archive](https://www.asciiart.eu/animals/monkeys)
 
+## RECURSOS DE ESTUDO
+
+- [Writing An Interpreter In Go](https://interpreterbook.com/)
+- [Crafting Interpreters](https://craftinginterpreters.com/)
+
 ## ANALISE LÉXICA
 
 Para podermos trabalhar com o código fonte precisamos antes transformar texto em algo que possamos trabalhar, e é isso que a analise léxica faz, ela transforma o código fonte em tokens.
@@ -268,6 +273,7 @@ AST = Abstract Syntax Tree (Árvore Sintática Abstrata)
 Uma AST é uma estrutura de dados que representa o código fonte de forma hierárquica, ela é muito útil para avaliar o código fonte.
 
 O código fonte a seguir é representado pelo AST abaixo:
+
 ```monkey
 let x = 1 + 2;
 ```
@@ -301,6 +307,8 @@ let x = 1 + 2;
 
 O AST acima é um JSON fictício, mas os ASTs reais são muito parecidos com ele.
 
+Significado de cada propriedade:
+
 Dizemos que é uma árvore porque ela é composta por nós, e esses nós podem ter filhos.
 Dizemos que é uma árvore sintática porque ela representa a sintaxe da linguagem.
 Dizemos que é uma árvore sintática abstrata porque ela não representa o código fonte de forma exata, ela é uma abstração do código fonte onde só consideramos o que é importante para nós.
@@ -309,7 +317,7 @@ Dizemos que é uma árvore sintática abstrata porque ela não representa o cód
 
 O parser é a ferramenta que nos permite transformar os tokens em uma AST, ele lê os tokens e gera a AST.
 
-No nosso programa temos um parser recursivo. Ele interpreta os token e vai gerando nós no AST, ele vai descendo na árvore até encontrar um token que não sabe o que fazer, nesse caso ele gera um erro.
+O nosso parser é um `recursive-descent parser`. Isso quer dizer que começamos do topo da árvore e vamos descendo até as folhas. Criando um nó raiz e adicionando nós filhos a ele usando funções recursivas que sabem que ASTs gerar para cada token.
 
 ## ESTUDAR
 
